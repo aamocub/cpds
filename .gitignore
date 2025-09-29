@@ -1,3 +1,5 @@
 .vscode
 rebar*
 *.beam
+report*
+!report.tex
