@@ -28,19 +28,20 @@ acceptor(Name, Promised, Voted, Value, PanelId) ->
           acceptor(Name, Promise, Voted, Value, PanelId)
       end;
     {accept, Proposer, Round, Proposal} ->
-      case order:goe(..., ...) of % Can we vote for this ballot?
+      case order:goe(Round, Promise) of % Can we vote for this ballot?
         true ->
           Proposer ! {vote, Round},
-          case order:goe(..., ...) of % Is the ballot number higher than the current maximum one?
+          case order:goe(Round, Voted) of % Is the ballot number higher than the current maximum one?
             true ->
       io:format("[Acceptor ~w] Phase 2: promised ~w voted ~w colour ~w~n",
                  [Name, Promised, Round, Proposal]),
               % Update gui
               PanelId ! {updateAcc, "Voted: " ++ io_lib:format("~p", [Round]),
                          "Promised: " ++ io_lib:format("~p", [Promised]), Proposal},
+              % Save the number and the value that come in the ballot
               acceptor(Name, Promised, Round, Proposal, PanelId);
             false ->
-              acceptor(Name, Promised, ..., ..., PanelId)
+              acceptor(Name, Promised, Voted, Value, PanelId)
           end;
         false ->
           Proposer ! {sorry, {accept, Round}},
