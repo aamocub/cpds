@@ -29,7 +29,7 @@ round(Name, Backoff, Round, Proposal, Acceptors, PanelId) ->
       {Value, Round};
     abort ->
       timer:sleep(rand:uniform(Backoff)),
-      Next = order:inc( Round ),
+      Next = order:inc(Round),
       round(Name, (2*Backoff), Next, Proposal, Acceptors, PanelId)
   end.
 
@@ -37,7 +37,7 @@ ballot(Name, Round, Proposal, Acceptors, PanelId) ->
   prepare(Round, Acceptors),
   Quorum = (length(Acceptors) div 2) + 1,
   MaxVoted = order:null(),
-  case collect(Quorum, Round, MaxVoted, Value) of
+  case collect(Quorum, Round, MaxVoted, Proposal) of
     {accepted, Value} ->
       io:format("[Proposer ~w] Phase 2: round ~w proposal ~w (was ~w)~n",
                  [Name, Round, Value, Proposal]),

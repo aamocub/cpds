@@ -13,7 +13,7 @@ init(Name, PanelId) ->
 acceptor(Name, Promised, Voted, Value, PanelId) ->
   receive
     {prepare, Proposer, Round} ->
-      case order:gr(Round, Promise) of
+      case order:gr(Round, Promised) of
         true ->
           Proposer ! {promise, Round, Voted, Value},
       io:format("[Acceptor ~w] Phase 1: promised ~w voted ~w colour ~w~n",
@@ -25,10 +25,10 @@ acceptor(Name, Promised, Voted, Value, PanelId) ->
           acceptor(Name, Round, Voted, Value, PanelId);
         false ->
           Proposer ! {sorry, {prepare, Round}},
-          acceptor(Name, Promise, Voted, Value, PanelId)
+          acceptor(Name, Promised, Voted, Value, PanelId)
       end;
     {accept, Proposer, Round, Proposal} ->
-      case order:goe(Round, Promise) of % Can we vote for this ballot?
+      case order:goe(Round, Promised) of % Can we vote for this ballot?
         true ->
           Proposer ! {vote, Round},
           case order:goe(Round, Voted) of % Is the ballot number higher than the current maximum one?
