@@ -3,3 +3,5 @@ rebar*
 *.beam
 report*
 !report.tex
+*.dump
+paxy.beam
