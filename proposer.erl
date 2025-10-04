@@ -61,11 +61,11 @@ collect(N, Round, MaxVoted, Proposal) ->
     {promise, Round, _, na} ->
       collect(N-1, Round, MaxVoted, Proposal);
     {promise, Round, Voted, Value} ->
-      case order:gr(Round, Voted) of
+      case order:gr(Voted, MaxVoted) of
         true ->
           collect(N-1, Round, Voted, Value);
         false ->
-          collect(N, Round, Voted, Proposal)
+          collect(N-1, Round, MaxVoted, Proposal)
       end;
     {promise, _, _,  _} ->
       collect(N, Round, MaxVoted, Proposal);
@@ -86,7 +86,7 @@ vote(N, Round) ->
     {vote, _} ->
       vote(N, Round);
     {sorry, {accept, Round}} ->
-      vote(N-1, Round);
+      vote(N, Round);
     {sorry, _} ->
       vote(N, Round)
   after ?timeout ->
