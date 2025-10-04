@@ -4,4 +4,3 @@ rebar*
 report*
 !report.tex
 *.dump
-paxy.beam
