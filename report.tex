@@ -3,6 +3,19 @@
 \usepackage{graphicx}
 \usepackage{url}
 
+\usepackage{hyperref}
+\hypersetup{
+    linktocpage,
+    pdfborderstyle={/S/U/W 1},
+    pdfborder=0 0 1,
+}
+
+\usepackage[nameinlink, noabbrev]{cleveref}
+\usepackage{booktabs}
+\usepackage{caption}
+\captionsetup{labelfont=sc,justification=centerlast}
+\captionsetup[table]{skip=3pt}
+
 \usepackage{microtype}
 
 \usepackage{titlesec}
@@ -43,6 +56,26 @@
 \texttt{promise} messages, \texttt{vote} messages, or both sent by the acceptor. Q) Does the
 algorithm still terminate? Does it require more rounds? How does the impact
 of message delays depend on the value of the timeout at the proposer?}
+
+\Cref{tab:delays} shows the effect of varying message delay time.
+If kept below timeout (\(< 2000\)\,ms), increasing delay only increases execution time, but does not affect the number of rounds (which remain at 1) or messages.
+However, as soon as this delay surpasses 2000\,ms, (e.g. by setting it at 2100\,ms), the number of rounds increases and execution time is significantly slower, although the algorithm still terminates.
+
+\begin{table}
+\centering
+\caption{Effect of message delays on rounds and execution time.}
+\label{tab:delays}
+\begin{tabular}{rrrr}
+\toprule
+Delay (ms)\! & No. rounds & No. messages & Time (ms)\! \\ \midrule
+0            & 1          & 44           & 2018        \\
+500          & 1          & 44           & 3052        \\
+1000         & 1          & 44           & 4068        \\
+2000         & 1          & 44           & 5168        \\
+2100         & 2          & 51           & 8170        \\
+3000         & 3          & 72           & 10935       \\ \bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Avoid sending \texttt{sorry} messages by commenting the corresponding sentences in the acceptor. Q) Could you come to an agreement when \texttt{sorry} messages are not sent?}
 
