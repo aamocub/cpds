@@ -4,20 +4,22 @@
 -define(RED, {255,0,0}).
 -define(BLUE, {0,0,255}).
 -define(GREEN, {0,255,0}).
+-define(YELLOW, {255,255,0}).
+-define(CYAN, {124,163,214}).
 
 % Sleep is a list with the initial sleep time for each proposer
 start(Sleep) ->
-  AcceptorNames = ["Homer", "Marge", "Bart", "Lisa", "Maggie"],
-  AccRegister = [homer, marge, bart, lisa, maggie],
-  ProposerNames = [{"Fry", ?RED}, {"Bender", ?GREEN}, {"Leela", ?BLUE}],
-  PropInfo = [{fry, ?RED}, {bender, ?GREEN}, {leela, ?BLUE}],
+  AcceptorNames = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Apu", "Jeff", "Burns", "Perro", "Bola de Nieve"],
+  AccRegister = [homer, marge, bart, lisa, maggie, apu, jeff, burns, perro, boladenieve],
+  ProposerNames = [{"Fry", ?RED}, {"Bender", ?GREEN}, {"Leela", ?BLUE}, {"Farnsworth", ?YELLOW}, {"Kiff", ?CYAN}],
+  PropInfo = [{fry, ?RED}, {bender, ?GREEN}, {leela, ?BLUE}, {farnsworth, ?YELLOW}, {kiff, ?CYAN}],
   register(gui, spawn(fun() -> gui:start(AcceptorNames, ProposerNames) end)),
   gui ! {reqState, self()},
   receive
     {reqState, State} ->
       {AccIds, PropIds} = State,
       start_acceptors(AccIds, AccRegister),
-      spawn(fun() -> 
+      spawn(fun() ->
         Begin = erlang:monotonic_time(),
         start_proposers(PropIds, PropInfo, AccRegister, Sleep, self()),
         wait_proposers(length(PropIds)),
@@ -26,7 +28,7 @@ start(Sleep) ->
         io:format("[Paxy] Total elapsed time: ~w ms~n", [Elapsed])
       end)
   end.
-    
+
 start_acceptors(AccIds, AccReg) ->
   case AccIds of
     [] ->
@@ -44,7 +46,7 @@ start_proposers(PropIds, PropInfo, Acceptors, Sleep, Main) ->
     [PropId|Rest] ->
       [{RegName, Colour}|RestInfo] = PropInfo,
       [FirstSleep|RestSleep] = Sleep,
-      proposer:start(RegName, Colour, Acceptors, FirstSleep, PropId, Main),	
+      proposer:start(RegName, Colour, Acceptors, FirstSleep, PropId, Main),
       start_proposers(Rest, RestInfo, Acceptors, RestSleep, Main)
   end.
 
@@ -62,6 +64,11 @@ stop() ->
   stop(bart),
   stop(lisa),
   stop(maggie),
+  stop(apu),
+  stop(jeff),
+  stop(burns),
+  stop(perro),
+  stop(boladenieve),
   stop(gui).
 
 stop(Name) ->
@@ -72,4 +79,4 @@ stop(Name) ->
       Pid ! stop
   end.
 
- 
+
