@@ -5,6 +5,10 @@
 
 \usepackage{microtype}
 
+\usepackage{titlesec}
+\titleformat*{\subsection}{\itshape}
+\renewcommand\thesubsection{\roman{subsection})}
+
 %opening
 \title{Seminar Report: Paxy}
 \author{ \textbf{Castilla Rodríguez, Víctor} \and \textbf{Chavez Quevedo, Luis Fernando} \and \textbf{Amorós Cubells, Alfonso}
@@ -34,6 +38,22 @@
 \section{Open questions}
 
 \textit{Try to answer all the open questions in the documentation. When possible, do experiments to support your answers.}
+
+\subsection{Try introducing different delays in the
+\texttt{promise} messages, \texttt{vote} messages, or both sent by the acceptor. Q) Does the
+algorithm still terminate? Does it require more rounds? How does the impact
+of message delays depend on the value of the timeout at the proposer?}
+
+\subsection{Avoid sending \texttt{sorry} messages by commenting the corresponding sentences in the acceptor. Q) Could you come to an agreement when \texttt{sorry} messages are not sent?}
+
+\subsection{Try randomly dropping \texttt{promise} messages, \texttt{vote} messages, or both in the acceptor. If you drop too many messages a quorum will of course never be found, but we could probably lose quite many. Q) How does the drop ratio affect the number of rounds required to reach consensus? What percentage of messages can we drop until consensus is no longer possible?}
+
+\subsection{Try increasing the number of acceptors and proposers. Q) What is the impact (in the number of rounds needed to get consensus) of having more acceptors while keeping the same number of proposers? What if we have more proposers while keeping the same number of acceptors?}
+
+\subsection{Adapt the \texttt{paxy} module to create the proposers in a remote Erlang instance (named paxy-pro) and to ensure that they can connect correctly to the
+acceptors, which must be created in a different remote Erlang instance (named
+paxy-acc).}
+% Note that acceptors and proposers should not be modified, the acceptors have to use locally registered names, there should be a single `start' (and `stop') function that creates (and stops) all the processes, and the proposers must be created once the acceptors are up and running. Check the slides about Erlang to refresh how processes are created remotely, how names registered in remote nodes are referred, and how Erlang runtime should be started to run distributed programs.
 
 \section{Personal opinion}
 
