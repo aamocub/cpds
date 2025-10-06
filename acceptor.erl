@@ -2,7 +2,7 @@
 -export([start/2]).
 
 -define(delay, 500).
--define(drop, 1).
+-define(drop, 0).
 
 send(Pid, Message) ->
   P = rand:uniform(10),
