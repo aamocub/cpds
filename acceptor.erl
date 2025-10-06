@@ -1,6 +1,8 @@
 -module(acceptor).
 -export([start/2]).
 
+-define(delay, 2100).
+
 start(Name, PanelId) ->
   spawn(fun() -> init(Name, PanelId) end).
 
@@ -15,7 +17,8 @@ acceptor(Name, Promised, Voted, Value, PanelId) ->
     {prepare, Proposer, Round} ->
       case order:gr(Round, Promised) of
         true ->
-          Proposer ! {promise, Round, Voted, Value},
+          timer:send_after(rand:uniform(?delay), Proposer, {promise, Round, Voted, Value}),
+          % Proposer ! {promise, Round, Voted, Value},
       io:format("[Acceptor ~w] Phase 1: promised ~w voted ~w colour ~w~n",
                  [Name, Round, Voted, Value]),
           % Update gui
@@ -24,13 +27,15 @@ acceptor(Name, Promised, Voted, Value, PanelId) ->
                      "Promised: " ++ io_lib:format("~p", [Round]), Colour},
           acceptor(Name, Round, Voted, Value, PanelId);
         false ->
+          % timer:send_after(rand:uniform(?delay), Proposer, {sorry, {prepare, Round}}),
           Proposer ! {sorry, {prepare, Round}},
           acceptor(Name, Promised, Voted, Value, PanelId)
       end;
     {accept, Proposer, Round, Proposal} ->
       case order:goe(Round, Promised) of % Can we vote for this ballot?
         true ->
-          Proposer ! {vote, Round},
+          timer:send_after(rand:uniform(?delay), Proposer, {vote, Round}),
+          % Proposer ! {vote, Round},
           case order:goe(Round, Voted) of % Is the ballot number higher than the current maximum one?
             true ->
       io:format("[Acceptor ~w] Phase 2: promised ~w voted ~w colour ~w~n",
