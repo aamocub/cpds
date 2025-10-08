@@ -52,22 +52,24 @@
 
 \textit{Try to answer all the open questions in the documentation. When possible, do experiments to support your answers.}
 
-\subsection{Try introducing different delays in the
+\subsection{\!Try introducing different delays in the
 \texttt{promise} messages, \texttt{vote} messages, or both sent by the acceptor. Q) Does the
 algorithm still terminate? Does it require more rounds? How does the impact
 of message delays depend on the value of the timeout at the proposer?}
 
 \Cref{tab:delays} shows the effect of varying message delay time.
-If kept below timeout (\(< 2000\)\,ms), increasing delay only increases execution time, but does not affect the number of rounds (which remain at 1) or messages.
-However, as soon as this delay surpasses 2000\,ms, (e.g. by setting it at 2100\,ms), the number of rounds increases and execution time is significantly slower, although the algorithm still terminates.
+If kept below timeout (\(< 2000\)\,ms), increasing delay only increases execution time, but does not affect the number of rounds
+% (which remain at 1)
+or messages.
+However, as soon as this delay surpasses 2000\,ms (e.g.~by setting it at 2100\,ms), the number of rounds increases and execution is significantly slower, although the algorithm still terminates.
 
-\begin{table}
+\begin{table}[htp]
 \centering
 \caption{Effect of message delays on rounds and execution time.}
 \label{tab:delays}
 \begin{tabular}{rrrr}
 \toprule
-Delay (ms)\! & No. rounds & No. messages & Time (ms)\! \\ \midrule
+Delay (ms)\! & No.~rounds & No.~messages & Time (ms)\! \\ \midrule
 0            & 1          & 44           & 2018        \\
 500          & 1          & 44           & 3052        \\
 1000         & 1          & 44           & 4068        \\
@@ -79,9 +81,33 @@ Delay (ms)\! & No. rounds & No. messages & Time (ms)\! \\ \midrule
 
 \subsection{Avoid sending \texttt{sorry} messages by commenting the corresponding sentences in the acceptor. Q) Could you come to an agreement when \texttt{sorry} messages are not sent?}
 
-\subsection{Try randomly dropping \texttt{promise} messages, \texttt{vote} messages, or both in the acceptor. If you drop too many messages a quorum will of course never be found, but we could probably lose quite many. Q) How does the drop ratio affect the number of rounds required to reach consensus? What percentage of messages can we drop until consensus is no longer possible?}
+\subsection{\!Try randomly dropping \texttt{promise} messages, \texttt{vote} messages, or both in the acceptor. If you drop too many messages a quorum will of course never be found, but we could probably lose quite many. Q) How does the drop ratio affect the number of rounds required to reach consensus? What percentage of messages can we drop until consensus is no longer possible?}
 
-\subsection{Try increasing the number of acceptors and proposers. Q) What is the impact (in the number of rounds needed to get consensus) of having more acceptors while keeping the same number of proposers? What if we have more proposers while keeping the same number of acceptors?}
+\Cref{tab:drop-chance} shows the correlation between the drop chance and the number of rounds it takes to terminate.
+If the drop chance is \(\leq 30\%\), it usually only takes two rounds to reach consensus.
+After that, the number of rounds increases significantly, needing more than 10 rounds if half of the packages are dropped.
+For drop chances \(\geq 70\%\), the algorithm is unlikely to terminate.
+
+\begin{table}[htp]
+\centering
+\caption{Average number of rounds depending on drop probability.}
+\label{tab:drop-chance}
+\begin{tabular}{rr}
+\toprule
+Drop chance\! & No.~rounds   \\ \midrule
+0\%           & 1                 \\
+10\%          & 2                 \\
+20\%          & 2                 \\
+30\%          & 2                 \\
+40\%          & 5                 \\
+50\%          & 13                \\
+60\%          & 12                \\
+70\%          & 16                \\
+80\%          & DNF               \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{\!Try increasing the number of acceptors and proposers. Q) What is the impact (in the number of rounds needed to get consensus) of having more acceptors while keeping the same number of proposers? What if we have more proposers while keeping the same number of acceptors?}
 
 \subsection{Adapt the \texttt{paxy} module to create the proposers in a remote Erlang instance (named paxy-pro) and to ensure that they can connect correctly to the
 acceptors, which must be created in a different remote Erlang instance (named
