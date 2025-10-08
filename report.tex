@@ -84,7 +84,7 @@ Delay (ms)\! & No.~rounds & No.~messages & Time (ms)\! \\ \midrule
 \subsection{\!Try randomly dropping \texttt{promise} messages, \texttt{vote} messages, or both in the acceptor. If you drop too many messages a quorum will of course never be found, but we could probably lose quite many. Q) How does the drop ratio affect the number of rounds required to reach consensus? What percentage of messages can we drop until consensus is no longer possible?}
 
 \Cref{tab:drop-chance} shows the correlation between the drop chance and the number of rounds it takes to terminate.
-If the drop chance is \(\leq 30\%\), it usually only takes two rounds to reach consensus.
+If the drop chance is \(\leq 30\%\), it usually only takes 2 rounds to reach consensus.
 After that, the number of rounds increases significantly, needing more than 10 rounds if half of the packages are dropped.
 For drop chances \(\geq 70\%\), the algorithm is unlikely to terminate.
 
@@ -108,6 +108,14 @@ Drop chance\! & No.~rounds   \\ \midrule
 \end{table}
 
 \subsection{\!Try increasing the number of acceptors and proposers. Q) What is the impact (in the number of rounds needed to get consensus) of having more acceptors while keeping the same number of proposers? What if we have more proposers while keeping the same number of acceptors?}
+
+We have already seen that only 1 round is needed with 3 proposers and 5 acceptors.
+If we add one more acceptor, then it takes 2 rounds to reach consensus.
+After that, increasing the number of acceptors (e.g.~to 20) does not increase the number of rounds.
+
+On the other hand, altering the number of proposers has more impact on the number of rounds.
+With 5 proposers and 5 acceptors, 3 rounds are needed; and with 10 proposers, the number of rounds reaches 5.
+Varying the initial delays generally does not reduce the number of rounds.
 
 \subsection{Adapt the \texttt{paxy} module to create the proposers in a remote Erlang instance (named paxy-pro) and to ensure that they can connect correctly to the
 acceptors, which must be created in a different remote Erlang instance (named
