@@ -28,8 +28,7 @@ init(Name, PanelId) ->
   if
     Pn == na -> acceptor(Name, Pr, Vt, Ac, PanelId);
     true -> acceptor(Name, Pr, Vt, Ac, Pn)
-  end,
-  acceptor(Name, Pr, Vt, Ac, PanelId).
+  end.
 
 acceptor(Name, Promised, Voted, Value, PanelId) ->
   receive
