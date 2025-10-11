@@ -23,22 +23,22 @@ start(Sleep) ->
       spawn(?ACCEPTOR_HOST, fun() -> start_acceptors(AccIds, AccRegister) end),
       start_bridges(PropRegister, ?ACCEPTOR_HOST, ?PROPOSER_HOST),
       start_bridges(AccRegister, ?PROPOSER_HOST, ?ACCEPTOR_HOST),
-      spawn(?PROPOSER_HOST, fun() -> 
+      spawn(?PROPOSER_HOST, fun() ->
         Begin = erlang:monotonic_time(),
         start_proposers(PropIds, PropInfo, AccRegister, Sleep, self()),
         wait_proposers(length(PropIds)),
         End = erlang:monotonic_time(),
-        Elapsed = erlang:convert_time_unit(End-Begin, native, millisecond),
+        Elapsed = erlang:convert_time_unit(End - Begin, native, millisecond),
         io:format("[Paxy] Total elapsed time: ~w ms~n", [Elapsed])
       end)
   end.
-    
+
 start_acceptors(AccIds, AccReg) ->
   case AccIds of
     [] ->
       ok;
-    [AccId|Rest] ->
-      [RegName|RegNameRest] = AccReg,
+    [AccId | Rest] ->
+      [RegName | RegNameRest] = AccReg,
       register(RegName, acceptor:start(RegName, AccId)),
       start_acceptors(Rest, RegNameRest)
   end.
@@ -47,10 +47,10 @@ start_proposers(PropIds, PropInfo, Acceptors, Sleep, Main) ->
   case PropIds of
     [] ->
       ok;
-    [PropId|Rest] ->
-      [{RegName, Colour}|RestInfo] = PropInfo,
-      [FirstSleep|RestSleep] = Sleep,
-      register(RegName, proposer:start(RegName, Colour, Acceptors, FirstSleep, PropId, Main)),	
+    [PropId | Rest] ->
+      [{RegName, Colour} | RestInfo] = PropInfo,
+      [FirstSleep | RestSleep] = Sleep,
+      register(RegName, proposer:start(RegName, Colour, Acceptors, FirstSleep, PropId, Main)),
       start_proposers(Rest, RestInfo, Acceptors, RestSleep, Main)
   end.
 
@@ -58,7 +58,7 @@ start_bridges(Bridges, Host, TargetHost) ->
   case Bridges of
     [] ->
       ok;
-    [BridgeName|Rest] ->
+    [BridgeName | Rest] ->
       spawn(Host, remote_paxy, start_bridge, [BridgeName, Host, TargetHost]),
       start_bridges(Rest, Host, TargetHost)
   end.
@@ -68,16 +68,21 @@ wait_proposers(0) ->
 wait_proposers(N) ->
   receive
     done ->
-      wait_proposers(N-1)
+      wait_proposers(N - 1)
   end.
 
 stop() ->
-  stop(homer),
-  stop(marge),
-  stop(bart),
-  stop(lisa),
-  stop(maggie),
-  stop(gui).
+  stop(gui),
+  Participants = [fry, bender, leela, homer, marge, bart, lisa, maggie],
+  lists:foreach(
+    fun(Acc) -> spawn(?ACCEPTOR_HOST, remote_paxy, stop, [Acc]) end,
+    Participants
+  ),
+  lists:foreach(
+    fun(Prop) -> spawn(?PROPOSER_HOST, remote_paxy, stop, [Prop]) end,
+    Participants
+  ),
+  io:format("[Paxy] All components stopped~n").
 
 stop(Name) ->
   case whereis(Name) of
@@ -88,13 +93,17 @@ stop(Name) ->
   end.
 
 start_bridge(BridgeName, BridgeHost, TargetHost) ->
-  io:format("[Paxy] Starting bridge ~w in ~w to ~w ~n", [BridgeName, BridgeHost, TargetHost]),
+  io:format("[Bridge] Starting bridge ~w in ~w to ~w~n",
+            [BridgeName, BridgeHost, TargetHost]),
   register(BridgeName, self()),
   bridge(BridgeName, TargetHost).
 
 bridge(BridgeName, TargetHost) ->
   receive
+    stop ->
+      io:format("[Bridge] Bridge ~w stopping~n", [BridgeName]),
+      ok;
     Msg ->
-      {BridgeName, TargetHost} ! Msg
-  end,
-  bridge(BridgeName, TargetHost).
+      {BridgeName, TargetHost} ! Msg,
+      bridge(BridgeName, TargetHost)
+  end.
