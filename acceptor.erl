@@ -34,9 +34,9 @@ acceptor(Name, Promised, Voted, Value, PanelId) ->
         true ->
           send(Proposer, {promise, Round, Voted, Value}),
           pers:open(Name),
-          pers:store(Name, Promised, Voted, Value, PanelId),
+          pers:store(Name, Round, Voted, Value, PanelId),
           pers:close(Name),
-      io:format("[Acceptor ~w] Phase 1: promised ~w voted ~w colour ~w~n",
+          io:format("[Acceptor ~w] Phase 1: promised ~w voted ~w colour ~w~n",
                  [Name, Round, Voted, Value]),
           % Update gui
           Colour = case Value of na -> {0,0,0}; _ -> Value end,
@@ -51,12 +51,12 @@ acceptor(Name, Promised, Voted, Value, PanelId) ->
       case order:goe(Round, Promised) of % Can we vote for this ballot?
         true ->
           send(Proposer, {vote, Round}),
-          pers:open(Name),
-          pers:store(Name, Promised, Round, Value, PanelId),
-          pers:close(Name),
           case order:goe(Round, Voted) of % Is the ballot number higher than the current maximum one?
             true ->
-      io:format("[Acceptor ~w] Phase 2: promised ~w voted ~w colour ~w~n",
+              pers:open(Name),
+              pers:store(Name, Promised, Round, Proposal, PanelId),
+              pers:close(Name),
+              io:format("[Acceptor ~w] Phase 2: promised ~w voted ~w colour ~w~n",
                  [Name, Promised, Round, Proposal]),
               % Update gui
               PanelId ! {updateAcc, "Voted: " ++ io_lib:format("~p", [Round]),
