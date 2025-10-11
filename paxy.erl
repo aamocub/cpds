@@ -15,6 +15,7 @@ start(Sleep) ->
   PropInfo = [{fry, ?RED}, {bender, ?GREEN}, {leela, ?BLUE}, {farnsworth, ?YELLOW}, {kiff, ?CYAN}],
   register(gui, spawn(fun() -> gui:start(AcceptorNames, ProposerNames) end)),
   gui ! {reqState, self()},
+  % crash(homer),
   receive
     {reqState, State} ->
       {AccIds, PropIds} = State,
@@ -82,10 +83,8 @@ stop(Name) ->
 crash(Name) ->
   case whereis(Name) of
     undefined ->
-      io:format("[CRASH] Name ~w undefined~n", [Name]),
       ok;
     Pid ->
-      io:format("[CRASH] Name ~w defined~n", [Name]),
       unregister(Name),
       exit(Pid, "crash"),
       pers:open(Name),
