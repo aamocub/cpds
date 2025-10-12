@@ -5,8 +5,8 @@
 -define(BLUE, {0,0,255}).
 -define(GREEN, {0,255,0}).
 
--define(ACCEPTOR_HOST, 'paxy-acc@DESKTOP-RB1DUQF').
--define(PROPOSER_HOST, 'paxy-pro@DESKTOP-RB1DUQF').
+-define(ACCEPTOR_HOST, 'paxy-acc@localhost').
+-define(PROPOSER_HOST, 'paxy-pro@localhost').
 
 % Sleep is a list with the initial sleep time for each proposer
 start(Sleep) ->
