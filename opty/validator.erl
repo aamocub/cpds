@@ -11,13 +11,14 @@ validator() ->
     receive
         {validate, Ref, Reads, Writes, Client} ->
             Tag = make_ref(),
-            send_read_checks(..., Tag),  %% TODO: COMPLETE
-            case check_reads(..., Tag) of  %% TODO: COMPLETE
+            send_read_checks(Reads, Tag),  %% Send check message to all entries
+            case check_reads(length(Reads), Tag) of  %% Check receiving messages from entries to see if the read operations have the same timestamps
                 ok ->
-                    update(...),  %% TODO: COMPLETE
+                    update(Writes),  %% Update store with pending write operations
                     Client ! {Ref, ok};
                 abort ->
-                    %% TODO: ADD SOME CODE
+                    %% If 1 entry or more report an abort message, we are done and send the client an abort message as well
+                    Client ! {Ref, abort}
             end,
             validator();
         stop ->
@@ -25,18 +26,20 @@ validator() ->
         _Old ->
             validator()
     end.
-    
+
 update(Writes) ->
-    lists:foreach(fun({_, Entry, Value}) -> 
-                  %% TODO: ADD SOME CODE
-                  end, 
+    lists:foreach(fun({_, Entry, Value}) ->
+                  %% Send new Value to write in Entry
+                    Entry ! {write, Value}
+                  end,
                   Writes).
 
 send_read_checks(Reads, Tag) ->
     Self = self(),
-    lists:foreach(fun({Entry, Time}) -> 
-                  %% TODO: ADD SOME CODE
-                  end, 
+    lists:foreach(fun({Entry, Time}) ->
+                  %% Send read check messages to all Entries
+                    Entry ! {check, Tag, Time, Self}
+                  end,
                   Reads).
 
 check_reads(0, _) ->
