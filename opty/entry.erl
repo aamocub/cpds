@@ -10,16 +10,15 @@ init(Value) ->
 entry(Value, Time) ->
     receive
         {read, Ref, From} ->
-            %% TODO: ADD SOME CODE
+            %% Send ok message back to requester. Tagged with reference, pid, value and timestamp.
+            From ! {{Ref, self(), Value, Time}, ok}
             entry(Value, Time);
         {write, New} ->
-            entry(... , ...);  %% TODO: COMPLETE
+            entry(New , make_ref());  %% Write new value to entry and update timestamp
         {check, Ref, Readtime, From} ->
-            if 
-                 ... == ... ->   %% TODO: COMPLETE
-                    %% TODO: ADD SOME CODE
-                true ->
-                    From ! {Ref, abort}
+            if
+                Readtime == Time -> From ! {Ref, ok}
+                true -> From ! {Ref, abort}
             end,
             entry(Value, Time);
         stop ->
