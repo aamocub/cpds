@@ -1,0 +1,7 @@
+.vscode
+rebar*
+*.beam
+report*
+!report.tex
+*.dump
+.DS_Store
