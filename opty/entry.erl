@@ -10,11 +10,11 @@ init(Value) ->
 entry(Value, Time) ->
     receive
         {read, Ref, From} ->
-            %% Send ok message back to requester. Tagged with reference, pid, value and timestamp.
+            % Send ok message back to requester. Tagged with reference, pid, value and timestamp.
             From ! {{Ref, self(), Value, Time}, ok},
             entry(Value, Time);
         {write, New} ->
-            entry(New , make_ref());  %% Write new value to entry and update timestamp
+            entry(New , make_ref());  % Write new value to entry and update timestamp
         {check, Ref, Readtime, From} ->
             if
                 Readtime == Time -> From ! {Ref, ok};
