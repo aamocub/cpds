@@ -3,7 +3,7 @@ build: clean
 	erlc -o .build/ *.erl
 
 run: build
-	cd .build && erl -eval 'opty:start(3,6,2,2,5)'
+	cd .build && erl -noshell -eval 'opty:start(3,6,2,2,5)'
 
 clean:
 	rm -rf .build
