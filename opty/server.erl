@@ -12,7 +12,7 @@ init(N) ->
 server(Validator, Store) ->
     receive
         {open, Client} ->
-            Client ! {transaction, Validator, Store}, %% Send validator and store information for Transaction Handler creation at Client
+            Client ! {transaction, Validator, Store}, % Send validator and store information for Transaction Handler creation at Client
             server(Validator, Store);
         stop ->
             Validator ! stop,

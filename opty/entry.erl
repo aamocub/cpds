@@ -14,7 +14,7 @@ entry(Value, Time) ->
             From ! {Ref, self(), Value, Time},
             entry(Value, Time);
         {write, New} ->
-            entry(New , make_ref());  %% Write new value to entry and update timestamp
+            entry(New , make_ref());  % Write new value to entry and update timestamp
         {check, Ref, Readtime, From} ->
             if
                 Readtime == Time -> From ! {Ref, ok};
