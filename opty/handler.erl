@@ -22,12 +22,11 @@ handler(Client, Validator, Store, Reads, Writes) ->
             Client ! {value, Ref, Value}, % Send read info to the client
             handler(Client, Validator, Store, [{Entry, Time}|Reads], Writes);
         {write, N, Value} ->
-            %% TODO: ADD SOME CODE HERE AND COMPLETE NEXT LINE
-            % Entry = store:lookup(N, Store), % TODO: is this correct?
+            Entry = store:lookup(N, Store),
             Added = lists:keystore(N, 1, Writes, {N, Entry, Value}),
             handler(Client, Validator, Store, Reads, Added);
         {commit, Ref} ->
-            %% TODO: ADD SOME CODE
+            Validator ! {validate, Ref, Reads, Writes, Client};
         abort ->
             ok
     end.
