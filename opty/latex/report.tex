@@ -1,0 +1,358 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage[utf8]{inputenc} % Change according your file encoding
+\usepackage{graphicx}
+\usepackage{url}
+
+\usepackage{hyperref}
+\hypersetup{
+    linktocpage,
+    pdfborderstyle={/S/U/W 1},
+    pdfborder=0 0 1,
+}
+
+\usepackage[nameinlink, noabbrev]{cleveref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{labelfont=sc,justification=centerlast}
+\captionsetup[table]{skip=3pt}
+\subcaptionsetup{labelfont=up}
+
+\usepackage{microtype}
+
+\usepackage{titlesec}
+% \titleformat*{\subsection}{\itshape}
+% \renewcommand\thesubsection{\roman{subsection})}
+
+\usepackage[newfloat]{minted2}
+\setminted{
+    breaklines,
+    fontfamily=tt,
+    style=bw,
+    escapeinside=¬¬,
+    tabsize=4,
+}
+\setmintedinline{
+    fontfamily=tt,
+    style=bw,
+}
+
+\RequirePackage{xcolor}
+\definecolor{gris}{HTML}{747474}
+\definecolor{azul}{HTML}{19327F}
+\definecolor{rojo}{HTML}{BE511C}
+\definecolor{turquesa}{HTML}{0F7699} 
+\definecolor{purpura}{HTML}{8B2368}
+\definecolor{morado}{HTML}{2C1D41}
+\definecolor{verde}{HTML}{4B7463}
+
+\usepackage{pgfplots}
+
+\pgfplotsset{
+    % Ejes
+    axis x line=bottom,
+    axis y line=left,
+    axis line style={shorten >= -6pt}, % Alargar flechas
+    /pgfplots/layers/custom/.define layer set={
+        axis background, axis grid, main, axis ticks, axis lines, axis tick labels, axis descriptions, axis foreground
+    }{/pgfplots/layers/standard},
+    set layers=custom,
+    % Ticks
+    minor x tick num=1,
+    minor y tick num=1,
+    every x tick/.style={color=black, thin},
+    every y tick/.style={color=black, thin},
+    every minor x tick/.style={color=gris, thin},
+    every minor y tick/.style={color=gris, thin},
+    grid style={color=gris, loosely dashed, line cap=rect},
+    % Estilo
+    every axis plot/.append style={
+        very thick,
+        line cap=rect,
+    },
+    % Leyenda
+    legend cell align=left,
+    %legend style={draw=none},
+    % Separador de miles
+    /pgf/number format/.cd,
+    1000 sep={\,},
+}
+\pgfplotsset{
+    cycle multi list={
+        {solid, mark=*}, \nextlist azul, rojo, turquesa, purpura, morado
+    }
+}
+
+
+%opening
+\title{Seminar Report: Opty}
+\author{\textbf{Castilla Rodríguez, Víctor}\and \textbf{Chavez Quevedo, Luis Fernando}\and \textbf{Amorós Cubells, Alfonso}
+}
+\date{\normalsize\today{}}
+
+
+
+
+\begin{document}
+
+\maketitle
+
+% \begin{center}
+%   Upload your report in PDF format.
+
+%   Use this LaTeX template to format the report.
+
+% 	A compressed file (.tar.gz) containing all your source code files must be submitted together with this report\footnote{Describe in the report any design decision required to understand your code (if any)}.
+% \end{center}
+
+\section{Introduction}
+
+% \textit{Introduce in a couple of sentences the seminar and the main topic related to distributed systems it covers.}
+
+
+
+\section{Performance}
+
+% \textit{Provide evidence of the experiments you did (e.g., use screenshots) and discuss the results you got. In addition, you may provide figures or tables with experimental results of the system evaluation. For each seminar, we will provide you with some guidance on which kind of evaluation you should do.}
+
+The following subsections explore how varying parameters affects the percentage of transactions that commit successfully.
+Unless otherwise specified, the default parameters are 5 clients, 50 entries, 1 read and 1 write per transaction, and 5 seconds of execuction time.
+
+The percentage of successful transactions shown is calculated as the average of the success rate of every client.
+It is important to note that the success rate is almost the same for all clients in every single experiment (standard deviation is \(< 0.5\%\) in all cases).
+
+\subsection{Number of concurrent clients}
+
+\Cref{fig:nclients} shows the correlation between the number of clients and the average successful transactions.
+With 1 client, 100\% of operations succeed, as there can never be conflicts.
+This percentage steadily decreases with the increase of concurrent clients.
+
+With 1 read and 1 write per transaction (labeled in the graph as 1\,RD 1\,WR), it falls down to 87.8\% with 10 clients and 68.8\% with 30 clients.
+
+With 2 reads and 2 writes, 
+conflicts are more likely to appear, causing transactions to abort more often.
+The success rate is 68.1\% with 10 clients and 41.6\% with 30 clients.
+
+
+% With 25 clients, the number of clients is more than double the number of entries, and successful transactions are 41.9\%.
+
+% TODO maybe do again w/ 50 entries, reformat paragraph above to reflect 2RD2WR
+
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    xmax=30,
+    ymin=0,
+    ymax=100,
+    xlabel=Number of clients,
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=Clients,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/clients_50_1rd1wr.csv};
+\addlegendentry{1\,RD, 1\,WR}
+
+\addplot table [
+    col sep=semicolon,
+    x=Clients,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/clients_50_2rd2wr.csv};
+\addlegendentry{2\,RD, 2\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Average successful transactions depending on the  number of clients.}
+\label{fig:nclients}
+\end{center}
+\end{figure}
+
+
+\subsection{Number of entries}
+
+% Baseline: 5 clients 1RD 1WR
+\Cref{fig:nentries} shows how the number of entries in the store impacts successful transactions.
+As one might expect in this scenario, increasing the number of entries reduces the possibility of two transactions picking the same entry and thus increases the average number of successful transactions.
+
+The graph shows this is true both for 1\,RD 1\,WR per transaction and for 2\,RD 2\,WR per transaction (although there is an ``edge case'' with just 1 entry, in which both cases are conceptually identical but with different overhead).
+With 50 entries (not shown in the graph), the averages are 95\% and 84\%, respectively.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Number of entries,
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=Entries,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/nentries (copia).csv};
+\addlegendentry{1\,RD, 1\,WR}
+
+\addplot table [
+    col sep=semicolon,
+    x=Entries,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/nentries_2RD2WR (copia).csv};
+\addlegendentry{2\,RD, 2\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Average successful transactions depending on the  number of entries.}
+\label{fig:nentries}
+\end{center}
+\end{figure}
+
+
+\subsection{Number of read operations per transaction}
+
+\Cref{fig:nreads} shows the effect of varying the number of reads per transaction (with 1 write).
+
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    % xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Number of reads,
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=Rd,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/reads.csv};
+% \addlegendentry{1\,RD, 1\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Average successful transactions depending on the  number of reads.}
+\label{fig:nreads}
+\end{center}
+\end{figure}
+
+
+\subsection{Number of write operations per transaction}
+
+\Cref{fig:nwrites} shows the effect of varying the number of writes per transaction (with 1 read).
+Note that increasing the number of writes makes performance worsen faster than in the previous scenario of increasing the number of reads.
+That is, the performance of 1\,RD 20\,WR is worse than 20\,RD 1\,WR.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    % xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Number of writes,
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=Wr,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/writes.csv};
+% \addlegendentry{1\,RD, 1\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Average successful transactions depending on the  number of writes.}
+\label{fig:nwrites}
+\end{center}
+\end{figure}
+
+\subsection{Ratio of read and write operations per transaction}
+
+\Cref{fig:ratio} displays the performance of varying the ratio of read and write operations
+for a fixed amount of 10 operations per transaction (i.e., 10\,RD 0\,WR at the beginning and 0\,RD 10\,WR at the end).
+
+As expected, the extreme cases have 100\% successful transactions, as no conflicts can occur.
+The worst performance happens exactly at the midway point (55.12\%), although 4\,RD 6\,WR has similar bad performance (55.17\%).
+Consistent with the previous two subsections, writes are worse for performance, so for instance 1\,RD 9\,WR performs worse than 9\,RD 1\,WR.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    % xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Ratio of write operations (\%),
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=WrPercent,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/ratio10.csv};
+% \addlegendentry{1\,RD, 1\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Performance under a different ratio of read/writes with 10 total operations.}
+\label{fig:ratio}
+\end{center}
+\end{figure}
+
+
+
+
+\section{Open questions}
+
+% \textit{Try to answer all the open questions in the documentation. When possible, do experiments to support your answers.}
+
+\section{Personal opinion}
+
+% \textit{Provide your personal opinion of the seminar, indicating whether it should be included in next year's course or not.}
+
+
+
+\end{document}
