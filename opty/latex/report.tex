@@ -119,7 +119,7 @@ The following subsections explore how varying parameters affects the percentage 
 Unless otherwise specified, the default parameters are 5 clients, 50 entries, 1 read and 1 write per transaction, and 5 seconds of execuction time.
 
 The percentage of successful transactions shown is calculated as the average of the success rate of every client.
-It is important to note that the success rate is almost the same for all clients in every single experiment (standard deviation is \(< 0.5\%\) in all cases).
+It is important to note that, except for \cref{sec:ptge}, the success rate is almost the same for all clients in every experiment (standard deviation is \(< 0.5\%\)).
 
 \subsection{Number of concurrent clients}
 
@@ -343,7 +343,112 @@ Consistent with the previous two subsections, writes are worse for performance, 
 \end{figure}
 
 
+\subsection{Percentage of accessed entries} \label{sec:ptge}
 
+To vary the percentage of accessed entries with
+respect to the total number of entries,
+we need to generate a random subset of entries for each client.
+% (i.e. each client accesses a randomly
+% generated subset of the store: the number of entries in each subset should be the
+% same for all the clients, but the subsets should be different per client and should
+% not contain necessarily contiguous entries)
+To do this, the clients now take the \texttt{SubsetLen} parameter (instead of the number of \texttt{Reads} and \texttt{Writes}) to generate a random subset:
+\begin{minted}{erlang}
+start(ClientID, Entries, Server, SubsetLen) ->
+    Subset = lists:sublist([X || {_, X} <- lists:sort([{rand:uniform(), E} || E <- lists:seq(1, Entries)])], SubsetLen),
+    spawn(fun() -> open(ClientID, Subset, Server, 0, 0) end).
+\end{minted}
+Then, when performing a transaction, only entries from the subset are read or written:
+\begin{minted}{erlang}
+do_transaction(_, [], Handler) ->
+    do_commit(Handler);
+do_transaction(ClientID, Subset, Handler) ->
+    [Num | RemSubset] = Subset,
+    Op = rand:uniform(),
+    if Op >= 0.5 ->
+         do_read(Num, Handler);
+       true -> 
+         do_write(Num, Handler, ClientID)
+    end,
+    do_transaction(ClientID, RemSubset, Handler).
+\end{minted}
+
+\Cref{fig:vi} shows the effect of varying the subset size up to 30 (i.e., 60\% of entries).
+Unlike previous experiments, the resulting success rate varies greatly across clients: some clients might never experience conflicts if all of their entries are different from other clients, while others might share a lot of entries and thus have many conflicts.
+This is shown in the graph by displaying the maximum and minimum success rates obtained as error bars.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Subset size,
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.46\textwidth,
+]
+
+\addplot plot[error bars/.cd, y dir=both, y explicit] table [
+    col sep=semicolon,
+    x=SubsetSize,
+    y=Avg,
+    y error plus=MaxMinusAvg,
+    y error minus=AvgMinusMin,
+    /pgf/number format/read comma as period,
+] {csv/subsetCopy.csv};
+% \addlegendentry{1\,RD, 1\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Performance while varying the subset size for every client.}
+\label{fig:vi}
+\end{center}
+\end{figure}
+
+The number of conflicts depends greatly on the random subsets that have been chosen.
+For instance, with subset size 4, one client had a success rate of 100\% while the average was 76.6\%.
+Another extreme example ocurred with subset size 8, where one client had a success rate of 87\% while another only had 35\% (the average was 65.5\%). % with a standard deviation of 20.46
+
+As the subset size increases, ``unique'' sets for clients are less likely, and thus the percentage of successful transactions is roughly the same for every client.
+This is specially evident if we look at the standard deviation of the success percentage, shown in \cref{fig:stdv}.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    xmax=30.2,
+    ymin=0,
+    ymax=22,
+    xlabel=Subset size,
+    ylabel=Standard deviation (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.4\textwidth,
+]
+
+\addplot plot[turquesa, error bars/.cd, y dir=both, y explicit] table [
+    col sep=semicolon,
+    x=SubsetSize,
+    y=DesvTip,
+    % y error plus=MaxMinusAvg,
+    % y error minus=AvgMinusMin,
+    /pgf/number format/read comma as period,
+] {csv/subsetCopy.csv};
+% \addlegendentry{1\,RD, 1\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Standard deviation of successful transactions depending on subset size.}
+\label{fig:stdv}
+\end{center}
+\end{figure}
 
 \section{Open questions}
 
