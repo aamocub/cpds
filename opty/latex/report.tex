@@ -451,6 +451,37 @@ This is specially evident if we look at the standard deviation of the success pe
 \end{center}
 \end{figure}
 
+\section{Distributed execution}
+
+The changes made to the code in order to implement the distributed execution as requested consist of the following:
+
+\begin{itemize}
+\item They were defined two constants with the server host name and the start timeout respectively.
+\item It was implemented a \textit{startServer} function to be executed in the remote environment. This function just called the start function  of the server, registered it in the local instance, and sent a \textit{started} message back to the caller.
+\item The \textit{spawn} function was used to execute the previously described \textit{startServer} function.
+\item It was implemented a \textit{waitServer} function to await for the server \textit{started} message or abort after a timeout otherwise.
+\end{itemize}
+
+With the previous modification, the distributed execution was achieved. It can be evidenced in the following image:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/remote_success.png}
+    \caption{Distributed execution running succesfully}
+    \label{fig:distributed_ok}
+\end{figure}
+
+In the same way, if we kill the \textit{opty-srv} instance, it can be verified the distributed execution doesn't work anymore:
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/remote_fail.png}
+    \caption{Distributed execution failing}
+    \label{fig:distributed_fail}
+\end{figure}
+
+Regardig the question about where is the handler running, it runs in the same instance as the clients. The reason for this is that the only function exported in the \textit{handler} module is the \textit{start} function, and this function is only called inside \textit{client:open}, which is part of the internal functionality of the \textit{client} module, therefore, the handler will run wherever the client module is being executed.
+
+
 \section{Other concurrency control techniques:\\ Timestamp ordering}
 
 In this section, the previously shown performance of the optimistic concurrency control method will be compared and evaluated with the timestamp ordering technique's performance. As such, the provided implementation of timestamp ordering (Timey) will be used against the optimistic concurrency control's implementation (Opty).
@@ -810,7 +841,7 @@ Timestamp ordering also shows a high variability in the success rate of its clie
 
 % \textit{Provide your personal opinion of the seminar, indicating whether it should be included in next year's course or not.}
 
-This seminar has proven to be a valuable learning experience for understanding optimistic concurrency control and timestamp ordering.
+This seminar has proven to be a valuable learning experience for understanding optimistic concurrency control and timestamp ordering algorithms.
 The provided Erlang code made the implementation straightforward and provided a simple way to experiment by tweaking each parameter individually. 
 Overall, the seminar was useful and we believe it should be included in next year's course.
 
