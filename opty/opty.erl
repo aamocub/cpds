@@ -10,19 +10,17 @@
 start(Clients, Entries, Reads, Writes, Time) ->
     register(s, server:start(Entries)),
     L = startClients(Clients, [], Entries, Reads, Writes),
-    % io:format("Starting: ~w CLIENTS, ~w ENTRIES, ~w RDxTR, ~w WRxTR, DURATION ~w s~n",
-        %  [Clients, Entries, Reads, Writes, Time]),
-    io:format("~w;~w;~w;~w;~w;",
-        [Clients, Entries, Reads, Writes, Time]),
+    io:format("Starting: ~w CLIENTS, ~w ENTRIES, ~w RDxTR, ~w WRxTR, DURATION ~w s~n",
+         [Clients, Entries, Reads, Writes, Time]),
     timer:sleep(Time*1000),
     stop(L).
 
 stop(L) ->
-    % io:format("Stopping...~n"),
+    io:format("Stopping...~n"),
     stopClients(L),
     waitClients(L),
     s ! stop,
-    % io:format("Stopped~n"),
+    io:format("Stopped~n"),
     io:format("~n"),
     init:stop().
 
