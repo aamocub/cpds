@@ -11,7 +11,6 @@ open(ClientID, Subset, Server, Total, Ok) ->
         {stop, From} ->
             % io:format("~w: Transactions TOTAL:~w, OK:~w, -> ~w % ~n",
             % [ClientID, Total, Ok, 100*Ok/Total]),
-            io:format("=~w/~w;", [Ok, Total]),
             From ! {done, self()},
             ok;
         {transaction, Validator, Store} ->

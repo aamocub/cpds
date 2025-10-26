@@ -9,8 +9,7 @@ open(ClientID, Subset, Server, Total, Ok) ->
     Server ! {open, self()},
     receive
         {stop, From} ->
-            %% io:format("~w: Transactions TOTAL:~w, OK:~w, -> ~w % ~n", [ClientID, Total, Ok, 100*Ok/Total]),
-            io:format("=~w/~w;", [Ok, Total]),
+            io:format("~w: Transactions TOTAL:~w, OK:~w, -> ~w % ~n", [ClientID, Total, Ok, 100*Ok/Total]),
             From ! {done, self()},
             ok;
         {transaction, Time, Store} ->
@@ -41,37 +40,6 @@ do_transaction(ClientID, Subset, Handler, Tref) ->
                 ok -> do_transaction(ClientID, RemSubset, Handler, Tref)
             end
     end.
-%% do_transaction(ClientID, Entries, 0, Writes, Handler, Tref) ->
-%%     case do_write(Entries, Handler, ClientID, Tref) of
-%%         abort ->
-%%             abort;
-%%         ok ->
-%%             do_transaction(ClientID, Entries, 0, Writes-1, Handler, Tref)
-%%     end;
-%% do_transaction(ClientID, Entries, Reads, 0, Handler, Tref) ->
-%%     case do_read(Entries, Handler, Tref) of
-%%         abort ->
-%%             abort;
-%%         _ ->
-%%             do_transaction(ClientID, Entries, Reads-1, 0, Handler, Tref)
-%%     end;
-%% do_transaction(ClientID, Entries, Reads, Writes, Handler, Tref) ->
-%%     Op = rand:uniform(),
-%%     if Op >= 0.5 ->
-%%          case do_read(Entries, Handler, Tref) of
-%%              abort ->
-%%                  abort;
-%%              _ ->
-%%                  do_transaction(ClientID, Entries, Reads-1, Writes, Handler, Tref)
-%%          end;
-%%        true ->
-%%          case do_write(Entries, Handler, ClientID, Tref) of
-%%              abort ->
-%%                  abort;
-%%              ok ->
-%%                  do_transaction(ClientID, Entries, Reads, Writes-1, Handler, Tref)
-%%          end
-%%     end.
 
 do_read(Num, Handler, Tref) ->
     Ref = make_ref(),
