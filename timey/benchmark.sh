@@ -4,9 +4,10 @@ make build >/dev/null
 cd .build
 
 # Baseline: 5 clients, 50 entries, 1 read/trans, 1 write/trans, 5 seconds
-erl -noshell -eval "timey:start(5, 50, 1, 1, 5)"
+# note: changed for the subset variation
+erl -noshell -eval "timey:start(5, 50, 4, 5)"
 
-BASELINE="Clients;Entries;Rd;Wr;Sec;Avg"
+BASELINE="Clients;Entries;Rd;Wr;Sec"
 # STARTLINE="$BASELINE"
 # for client in $(seq 1 50)
 # do
@@ -64,16 +65,23 @@ done
 # done
 
 ## RATIO READS/WRITES
-echo $STARTLINE > ../csv/timey_ratio10.csv
-for rd in $(seq 0 10)
-do
-    erl -noshell -eval "timey:start(5, 50, $rd, $((10-$rd)), 5)" >> ../csv/timey_ratio10.csv
-done
+# echo $STARTLINE > ../csv/timey_ratio10.csv
+# for rd in $(seq 0 10)
+# do
+#     erl -noshell -eval "timey:start(5, 50, $rd, $((10-$rd)), 5)" >> ../csv/timey_ratio10.csv
+# done
+# 
+# echo $STARTLINE > ../csv/timey_ratio20.csv
+# for rd in $(seq 0 20)
+# do
+#     erl -noshell -eval "timey:start(5, 50, $rd, $((20-$rd)), 5)" >> ../csv/timey_ratio20.csv
+# done
 
-echo $STARTLINE > ../csv/timey_ratio20.csv
-for rd in $(seq 0 20)
+## NUMBER OF SUBSETS
+echo $STARTLINE > ../csv/timey_subsets.csv
+for ssize in $(seq 1 30)
 do
-    erl -noshell -eval "timey:start(5, 50, $rd, $((20-$rd)), 5)" >> ../csv/timey_ratio20.csv
+    erl -noshell -eval "timey:start(5, 50, $ssize, 5)" >> ../csv/timey_subsets.csv
 done
 
 # echo 'Clients;Entries;Rd;Wr;Sec;Client1;Client2;Client3;Client4;Client5;Avg;;'

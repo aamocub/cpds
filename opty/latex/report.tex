@@ -41,7 +41,7 @@
 \definecolor{gris}{HTML}{747474}
 \definecolor{azul}{HTML}{19327F}
 \definecolor{rojo}{HTML}{BE511C}
-\definecolor{turquesa}{HTML}{0F7699} 
+\definecolor{turquesa}{HTML}{0F7699}
 \definecolor{purpura}{HTML}{8B2368}
 \definecolor{morado}{HTML}{2C1D41}
 \definecolor{verde}{HTML}{4B7463}
@@ -115,8 +115,8 @@
 
 % \textit{Provide evidence of the experiments you did (e.g., use screenshots) and discuss the results you got. In addition, you may provide figures or tables with experimental results of the system evaluation. For each seminar, we will provide you with some guidance on which kind of evaluation you should do.}
 
-The following subsections explore how varying parameters affects the percentage of transactions that commit successfully.
-Unless otherwise specified, the default parameters are 5 clients, 50 entries, 1 read and 1 write per transaction, and 5 seconds of execuction time.
+The following subsections explore how varying parameters affect the percentage of transactions that commit successfully.
+Unless otherwise specified, the default parameters are 5 clients, 50 entries, 1 read and 1 write per transaction, and 5 seconds of execution time.
 
 The percentage of successful transactions shown is calculated as the average of the success rate of every client.
 It is important to note that, except for \cref{sec:ptge}, the success rate is almost the same for all clients in every experiment (standard deviation is \(< 0.5\%\)).
@@ -129,7 +129,7 @@ This percentage steadily decreases with the increase of concurrent clients.
 
 With 1 read and 1 write per transaction (labeled in the graph as 1\,RD 1\,WR), it falls down to 87.8\% with 10 clients and 68.8\% with 30 clients.
 
-With 2 reads and 2 writes, 
+With 2 reads and 2 writes,
 conflicts are more likely to appear, causing transactions to abort more often.
 The success rate is 68.1\% with 10 clients and 41.6\% with 30 clients.
 
@@ -367,7 +367,7 @@ do_transaction(ClientID, Subset, Handler) ->
     Op = rand:uniform(),
     if Op >= 0.5 ->
          do_read(Num, Handler);
-       true -> 
+       true ->
          do_write(Num, Handler, ClientID)
     end,
     do_transaction(ClientID, RemSubset, Handler).
@@ -447,6 +447,359 @@ This is specially evident if we look at the standard deviation of the success pe
 \end{tikzpicture}
 \caption{Standard deviation of successful transactions depending on subset size.}
 \label{fig:stdv}
+\end{center}
+\end{figure}
+
+\section{Other concurrency control techniques: Timestamp ordering}
+
+In this section, the previously shown performance of the optimistic concurrency control method will be compared and evaluated with the timestamp ordering technique's performance. As such, the provided implementation of timestamp ordering (Timey) will be used against the optimistic concurrency control's implementation (Opty).
+
+\subsection{Number of clients}
+
+\Cref{fig:tnclients} shows that the timestamp ordering technique averages a higher number of successful transactions than the optimistic method does.
+
+With 1 read and 1 write, the average success of timestamp ordering falls down to 84.5\% when working with 30 concurrent clients. Meanwhile, with 2 reads and 2 writes, the performance of timestamp ordering averages the same number of successful transactions as the optimistic method with 1 read and 1 write.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    xmax=30,
+    ymin=0,
+    ymax=100,
+    xlabel=Number of clients,
+    ylabel=Successful transactions (\%),
+    legend pos=south west,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=Clients,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/clients_50_1rd1wr.csv};
+\addlegendentry{Opty 1\,RD, 1\,WR}
+
+\addplot table [
+    col sep=semicolon,
+    x=Clients,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/clients_50_2rd2wr.csv};
+\addlegendentry{Opty 2\,RD, 2\,WR}
+
+\addplot table [
+    col sep=semicolon,
+    x=Clients,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/timey_clients_50_1rd1wr.csv};
+\addlegendentry{Timey 1\,RD, 1\,WR}
+
+\addplot table [
+    col sep=semicolon,
+    x=Clients,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/timey_clients_50_2rd2wr.csv};
+\addlegendentry{Timey 2\,RD, 2\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Average successful transactions depending on the number of clients with optimistic concurrency control (Opty) and timestamp ordering (Timey).}
+\label{fig:tnclients}
+\end{center}
+\end{figure}
+
+\subsection{Number of entries}
+
+\Cref{fig:tnentries} shows similar differences in transaction success rate between both concurrency control techniques as displayed in \cref{fig:tnclients}. Timestamp ordering delivers a higher number of successful transactions than the optimistic method. Even while benefiting from a higher number of entries, and thus, less conflicts, timestamp ordering delivers a higher performance.
+
+With 1 read and 1 write, timestamp ordering delivers a higher number of successful transactions. And as shown in the previous section, with 2 reads and 2 writes, its performance drops down to the same level as an optimistic concurrency control with only 1 read and 1 write per transaction.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Number of entries,
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=Entries,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/nentries (copia).csv};
+\addlegendentry{Opty 1\,RD, 1\,WR}
+
+\addplot table [
+    col sep=semicolon,
+    x=Entries,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/nentries_2RD2WR (copia).csv};
+\addlegendentry{Opty 2\,RD, 2\,WR}
+
+\addplot table [
+    col sep=semicolon,
+    x=Entries,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/timey_nentries_1rd1wr.csv};
+\addlegendentry{Timey 1\,RD, 1\,WR}
+
+\addplot table [
+    col sep=semicolon,
+    x=Entries,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/timey_nentries_2rd2wr.csv};
+\addlegendentry{Timey 2\,RD, 2\,WR}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Average successful transactions depending on the  number of entries with optimistic concurrency control (Opty) and timestamp ordering (Timey).}
+\label{fig:tnentries}
+\end{center}
+\end{figure}
+
+\subsection{Number of read operations per transaction}
+
+For the data shown in this subsection, the number of write operations per transaction has been set to 1.
+
+\Cref{fig:tnreads} reveals that the timestamp ordering implementation is able to maintain a higher average of successful transactions than the optimistic implementation, even with a high number of read operations, dropping its success rate from 99.8\% with 0 read operations to 93.8\% with 20 read operations per transaction. Meanwhile, the optimistic implementation's performance drops down to 60.3\% when doing up to 20 read operations per transaction.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    % xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Number of reads,
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=Rd,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/reads.csv};
+\addlegendentry{Opty}
+
+\addplot table [
+    col sep=semicolon,
+    x=Rd,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/timey_reads.csv};
+\addlegendentry{Timey}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Average successful transactions depending on the  number of reads with optimistic concurrency control (Opty) and timestamp ordering (Timey).}
+\label{fig:tnreads}
+\end{center}
+\end{figure}
+
+\subsection{Number of write operations per transaction}
+
+\Cref{fig:tnwrites} show that the performance of both techniques, timestamp ordering and optimistic control, perform similary with different amounts of write operations per transaction.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    % xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Number of writes,
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=Wr,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/writes.csv};
+\addlegendentry{Opty}
+
+\addplot table [
+    col sep=semicolon,
+    x=Wr,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/timey_writes.csv};
+\addlegendentry{Timey}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Average successful transactions depending on the  number of writes with optimistic concurrency control (Opty) and timestamp ordering (Timey).}
+\label{fig:tnwrites}
+\end{center}
+\end{figure}
+
+\subsection{Ratio of read and write operations per transaction}
+
+\Cref{fig:tratio} displays the different possible combinations of read and write operations per transaction, where each transaction does a total of 10 operations.
+
+As it was shown in previous sections, timestamp ordering performs better than optimistic concurrency control at handling multiple concurrent read operations per transaction, while showing that both methods have similar performance when doing multiple write operations per transaction.
+
+This difference in performance between read and write operations is shown in \cref{fig:tratio}, where a high ratio of read operations results in a higher success rate by the timestamp ordering implementation, while the higher ratio of write operations per transactions leaves similar levels of success rate for both techniques.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    % xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Ratio of write operations (\%),
+    ylabel=Successful transactions (\%),
+    legend pos=south east,
+    width=.98\textwidth,
+    height=0.45\textwidth,
+]
+
+\addplot table [
+    col sep=semicolon,
+    x=WrPercent,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/ratio10.csv};
+\addlegendentry{Opty}
+
+\addplot table [
+    col sep=semicolon,
+    x=WrPercent,
+    y=Avg,
+    /pgf/number format/read comma as period,
+] {csv/timey_ratio10.csv};
+\addlegendentry{Timey}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Performance under a different ratio of read/writes with 10 total operations with optimistic concurrency control (Opty) and timestamp ordering (Timey).}
+\label{fig:tratio}
+\end{center}
+\end{figure}
+
+\subsection{Percentage of accessed entries}
+
+\Cref{fig:tvi} shows the effect of varying the entry subset size given to each client in both implementations: timestamp ordering and optimistic control. The timestamp ordering implementation is able to maintain a higher success rate than the optimistic implementation, up to around a subset size of 20 entries. After that, its performance drops below the optimistic concurrency control method.
+
+Timestamp ordering also shows a high variability in the success rate of its clients, like the optimistic method. However, unlike the optimistic control, timestamp ordering keeps a higher degree of variability in the number of successful transactions of each client even with a larger subset size, as shown in \cref{fig:tstdv}.
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    xmax=30.2,
+    ymin=0,
+    ymax=100,
+    xlabel=Subset size,
+    ylabel=Successful transactions (\%),
+    legend pos=north east,
+    width=.98\textwidth,
+    height=0.46\textwidth,
+]
+
+\addplot plot[error bars/.cd, y dir=both, y explicit] table [
+    col sep=semicolon,
+    x=SubsetSize,
+    y=Avg,
+    y error plus=MaxMinusAvg,
+    y error minus=AvgMinusMin,
+    /pgf/number format/read comma as period,
+] {csv/subsetCopy.csv};
+\addlegendentry{Opty}
+
+\addplot plot[error bars/.cd, y dir=both, y explicit] table [
+    col sep=semicolon,
+    x=SubsetSize,
+    y=Avg,
+    y error plus=MaxMinusAvg,
+    y error minus=AvgMinusMin,
+    /pgf/number format/read comma as period,
+] {csv/timey_subsets.csv};
+\addlegendentry{Timey}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Performance while varying the subset size for every client with optimistic concurrency control (Opty) and timestamp ordering (Timey).}
+\label{fig:tvi}
+\end{center}
+\end{figure}
+
+\begin{figure}[htp]
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    ymajorgrids=true,
+    xmin=0,
+    xmax=30.2,
+    ymin=0,
+    ymax=22,
+    xlabel=Subset size,
+    ylabel=Standard deviation (\%),
+    legend pos=north east,
+    width=.98\textwidth,
+    height=0.4\textwidth,
+]
+
+\addplot plot[error bars/.cd, y dir=both, y explicit] table [
+    col sep=semicolon,
+    x=SubsetSize,
+    y=DesvTip,
+    % y error plus=MaxMinusAvg,
+    % y error minus=AvgMinusMin,
+    /pgf/number format/read comma as period,
+] {csv/subsetCopy.csv};
+\addlegendentry{Opty}
+
+\addplot plot[error bars/.cd, y dir=both, y explicit] table [
+    col sep=semicolon,
+    x=SubsetSize,
+    y=DesvTip,
+    % y error plus=MaxMinusAvg,
+    % y error minus=AvgMinusMin,
+    /pgf/number format/read comma as period,
+] {csv/timey_subsets.csv};
+\addlegendentry{Timeyy}
+
+\end{axis}
+\end{tikzpicture}
+\caption{Standard deviation of successful transactions depending on subset size with optimistic concurrency control (Opty) and timestamp ordering (Timey).}
+\label{fig:tstdv}
 \end{center}
 \end{figure}
 
