@@ -10,7 +10,7 @@
 start(Clients, Entries, SubsetSize, Time) ->
     register(s, server:start(Entries)),
     L = startClients(Clients, [], Entries, SubsetSize),
-    io:format("Starting: ~w CLIENTS, ~w ENTRIES, ~w SETSZ, ~w WRxTR, DURATION ~w s~n",
+    io:format("Starting: ~w CLIENTS, ~w ENTRIES, ~w SETSZ, DURATION ~w s~n",
          [Clients, Entries, SubsetSize, Time]),
     timer:sleep(Time*1000),
     stop(L).
@@ -41,3 +41,4 @@ waitClients(L) ->
         {done, Pid} ->
             waitClients(lists:delete(Pid, L))
     end.
+
