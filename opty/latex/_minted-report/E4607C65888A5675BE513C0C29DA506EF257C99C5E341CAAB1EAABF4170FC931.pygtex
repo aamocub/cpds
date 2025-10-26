@@ -1,0 +1,13 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+\PYG{n+nf}{do\PYGZus{}transaction}\PYG{p}{(}\PYG{p}{\PYGZus{}}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{[}\PYG{p}{]}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nv}{Handler}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZgt{}}
+\PYG{+w}{    }\PYG{n}{do\PYGZus{}commit}\PYG{p}{(}\PYG{n+nv}{Handler}\PYG{p}{)}\PYG{p}{;}
+\PYG{n+nf}{do\PYGZus{}transaction}\PYG{p}{(}\PYG{n+nv}{ClientID}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nv}{Subset}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nv}{Handler}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZgt{}}
+\PYG{+w}{    }\PYG{p}{[}\PYG{n+nv}{Num}\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }\PYG{n+nv}{RemSubset}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nv}{Subset}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n+nv}{Op}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n+nn}{rand}\PYG{p}{:}\PYG{n+nf}{uniform}\PYG{p}{(}\PYG{p}{)}\PYG{p}{,}
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{n+nv}{Op}\PYG{+w}{ }\PYG{o}{\PYGZgt{}}\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{.}\PYG{l+m+mi}{5}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZgt{}}
+\PYG{+w}{         }\PYG{n}{do\PYGZus{}read}\PYG{p}{(}\PYG{n+nv}{Num}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nv}{Handler}\PYG{p}{)}\PYG{p}{;}
+\PYG{+w}{       }\PYG{n}{true}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{o}{\PYGZgt{}}
+\PYG{+w}{         }\PYG{n}{do\PYGZus{}write}\PYG{p}{(}\PYG{n+nv}{Num}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nv}{Handler}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nv}{ClientID}\PYG{p}{)}
+\PYG{+w}{    }\PYG{k}{end}\PYG{p}{,}
+\PYG{+w}{    }\PYG{n}{do\PYGZus{}transaction}\PYG{p}{(}\PYG{n+nv}{ClientID}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nv}{RemSubset}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nv}{Handler}\PYG{p}{)}\PYG{p}{.}
+\end{Verbatim}
