@@ -110,12 +110,18 @@
 % \textit{Introduce in a couple of sentences the seminar and the main topic related to distributed systems it covers.}
 
 
+The objective of this seminar is implementing  optimistic concurrency control in Erlang, experimenting with different parameters (number of clients, store size, read/writes per transaction...) and seeing how they affect transactions.
 
-\section{Performance}
+The provided files contain three folders: \texttt{opty}, for the main implementation of Opty; \texttt{opty-subsets}, for the Opty implementation of \cref{sec:ptge}; and \texttt{timey-subsets}, for the Timey implementation of \cref{sec:timey-subsets}.
+
+Along with the code files, an auxiliary Makefile is provided for building and
+running the experiments. Thus, one can call \texttt{make run} to run the code.
+
+\section{Performance} \label{sec:performance}
 
 % \textit{Provide evidence of the experiments you did (e.g., use screenshots) and discuss the results you got. In addition, you may provide figures or tables with experimental results of the system evaluation. For each seminar, we will provide you with some guidance on which kind of evaluation you should do.}
 
-The following subsections explore how varying parameters affect the percentage of transactions that commit successfully.
+The following subsections explore how varying parameters affects the percentage of transactions that commit successfully.
 Unless otherwise specified, the default parameters are 5 clients, 50 entries, 1 read and 1 write per transaction, and 5 seconds of execution time.
 
 The percentage of successful transactions shown is calculated as the average of the success rate of every client.
@@ -132,12 +138,6 @@ With 1 read and 1 write per transaction (labeled in the graph as 1\,RD 1\,WR), i
 With 2 reads and 2 writes,
 conflicts are more likely to appear, causing transactions to abort more often.
 The success rate is 68.1\% with 10 clients and 41.6\% with 30 clients.
-
-
-% With 25 clients, the number of clients is more than double the number of entries, and successful transactions are 41.9\%.
-
-% TODO maybe do again w/ 50 entries, reformat paragraph above to reflect 2RD2WR
-
 
 \begin{figure}[htp]
 \begin{center}
@@ -231,7 +231,7 @@ With 50 entries (not shown in the graph), the averages are 95\% and 84\%, respec
 \subsection{Number of read operations per transaction}
 
 \Cref{fig:nreads} shows the effect of varying the number of reads per transaction (with 1 write).
-
+There is a linear decrease in successful transactions as the number of reads increases, falling down from 100\% with 0 reads to 60.3\% with 20 reads.
 
 \begin{figure}[htp]
 \begin{center}
@@ -358,6 +358,7 @@ start(ClientID, Entries, Server, SubsetLen) ->
     Subset = lists:sublist([X || {_, X} <- lists:sort([{rand:uniform(), E} || E <- lists:seq(1, Entries)])], SubsetLen),
     spawn(fun() -> open(ClientID, Subset, Server, 0, 0) end).
 \end{minted}
+
 Then, when performing a transaction, only entries from the subset are read or written:
 \begin{minted}{erlang}
 do_transaction(_, [], Handler) ->
@@ -433,7 +434,7 @@ This is specially evident if we look at the standard deviation of the success pe
     height=0.4\textwidth,
 ]
 
-\addplot plot[turquesa, error bars/.cd, y dir=both, y explicit] table [
+\addplot plot[error bars/.cd, y dir=both, y explicit] table [
     col sep=semicolon,
     x=SubsetSize,
     y=DesvTip,
@@ -450,9 +451,11 @@ This is specially evident if we look at the standard deviation of the success pe
 \end{center}
 \end{figure}
 
-\section{Other concurrency control techniques: Timestamp ordering}
+\section{Other concurrency control techniques:\\ Timestamp ordering}
 
 In this section, the previously shown performance of the optimistic concurrency control method will be compared and evaluated with the timestamp ordering technique's performance. As such, the provided implementation of timestamp ordering (Timey) will be used against the optimistic concurrency control's implementation (Opty).
+
+As with \cref{sec:performance}, the default parameters are 5 clients, 50 entries, 1 read and 1 write per transaction, and 5 seconds of execution time.
 
 \subsection{Number of clients}
 
@@ -580,7 +583,7 @@ With 1 read and 1 write, timestamp ordering delivers a higher number of successf
 
 For the data shown in this subsection, the number of write operations per transaction has been set to 1.
 
-\Cref{fig:tnreads} reveals that the timestamp ordering implementation is able to maintain a higher average of successful transactions than the optimistic implementation, even with a high number of read operations, dropping its success rate from 99.8\% with 0 read operations to 93.8\% with 20 read operations per transaction. Meanwhile, the optimistic implementation's performance drops down to 60.3\% when doing up to 20 read operations per transaction.
+\Cref{fig:tnreads} reveals that the timestamp ordering implementation is able to maintain a higher average of successful transactions than the optimistic im\-ple\-men\-ta\-tion, even with a high number of read operations, dropping its success rate from 99.8\% with 0 read operations to 93.8\% with 20 read operations per transaction. Meanwhile, the optimistic implementation's performance drops down to 60.3\% when doing up to 20 read operations per transaction.
 
 \begin{figure}[htp]
 \begin{center}
@@ -711,7 +714,7 @@ This difference in performance between read and write operations is shown in \cr
 \end{center}
 \end{figure}
 
-\subsection{Percentage of accessed entries}
+\subsection{Percentage of accessed entries} \label{sec:timey-subsets}
 
 \Cref{fig:tvi} shows the effect of varying the entry subset size given to each client in both implementations: timestamp ordering and optimistic control. The timestamp ordering implementation is able to maintain a higher success rate than the optimistic implementation, up to around a subset size of 20 entries. After that, its performance drops below the optimistic concurrency control method.
 
@@ -794,7 +797,7 @@ Timestamp ordering also shows a high variability in the success rate of its clie
     % y error minus=AvgMinusMin,
     /pgf/number format/read comma as period,
 ] {csv/timey_subsets.csv};
-\addlegendentry{Timeyy}
+\addlegendentry{Timey}
 
 \end{axis}
 \end{tikzpicture}
@@ -803,14 +806,12 @@ Timestamp ordering also shows a high variability in the success rate of its clie
 \end{center}
 \end{figure}
 
-\section{Open questions}
-
-% \textit{Try to answer all the open questions in the documentation. When possible, do experiments to support your answers.}
-
 \section{Personal opinion}
 
 % \textit{Provide your personal opinion of the seminar, indicating whether it should be included in next year's course or not.}
 
-
+This seminar has proven to be a valuable learning experience for understanding optimistic concurrency control and timestamp ordering algorithms.
+The provided Erlang code made the implementation straightforward and provided a simple way to experiment by tweaking each parameter individually. 
+Overall, the seminar was useful and we believe it should be included in next year's course.
 
 \end{document}
