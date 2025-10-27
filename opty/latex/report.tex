@@ -112,10 +112,11 @@
 
 The objective of this seminar is implementing  optimistic concurrency control in Erlang, experimenting with different parameters (number of clients, store size, read/writes per transaction...) and seeing how they affect transactions.
 
-The provided files contain three folders: \texttt{opty}, for the main implementation of Opty; \texttt{opty-subsets}, for the Opty implementation of \cref{sec:ptge}; and \texttt{timey-subsets}, for the Timey implementation of \cref{sec:timey-subsets}.
+The provided files contain three folders: \texttt{opty/}, for the main implementation of Opty; \texttt{opty-subsets/}, for the Opty implementation of \cref{sec:ptge}; and \texttt{timey-subsets/}, for the Timey implementation of \cref{sec:timey-subsets}.
 
 Along with the code files, an auxiliary Makefile is provided for building and
-running the experiments. Thus, one can call \texttt{make run} to run the code.
+running the experiments. Thus, one can call \texttt{make} \texttt{run} to run the code.
+The command \texttt{make} \texttt{remote} is also provided in \texttt{opty/} for running with two nodes.
 
 \section{Performance} \label{sec:performance}
 
@@ -450,6 +451,36 @@ This is specially evident if we look at the standard deviation of the success pe
 \label{fig:stdv}
 \end{center}
 \end{figure}
+
+\section{Distributed execution}
+
+The changes made to the code in order to implement the distributed execution as requested consist of the following:
+\begin{itemize}
+\item Two constants were defined with the server host name and the start timeout, respectively.
+\item A \texttt{startServer} function was implemented to be executed in the remote environment. This function just called the start function  of the server, registered it in the local instance, and sent a \texttt{started} message back to the caller.
+\item The \texttt{spawn} function is used to execute the previously described \texttt{startServer} function.
+\item A \texttt{waitServer} function was implemented  to await for the server \texttt{started} message or abort after a timeout otherwise.
+\end{itemize}
+
+With the previous modification, the distributed execution was achieved. It can be evidenced in \cref{fig:distributed_ok}.
+In the same way, if we kill the \texttt{opty-srv} instance, it can be verified the distributed execution does not work anymore, as shown in \cref{fig:distributed_fail}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\linewidth]{img/remote_success.png}
+    \caption{Distributed execution running succesfully.}
+    \label{fig:distributed_ok}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\linewidth]{img/remote_fail.png}
+    \caption{Distributed execution failing.}
+    \label{fig:distributed_fail}
+\end{figure}
+
+Regarding the question about where is the handler running, it runs in the same instance as the clients. The reason for this is that the only function exported in the \texttt{handler} module is the \texttt{start} function, and this function is only called inside \texttt{client:open}, which is part of the internal functionality of the \texttt{client} module, therefore, the handler will run wherever the client module is being executed.
+
 
 \section{Other concurrency control techniques:\\ Timestamp ordering}
 
@@ -805,6 +836,8 @@ Timestamp ordering also shows a high variability in the success rate of its clie
 \label{fig:tstdv}
 \end{center}
 \end{figure}
+
+\newpage
 
 \section{Personal opinion}
 
